@@ -1,5 +1,3 @@
-using MediatR;
-
 namespace UserManagement.Application.DTOs.Requests;
 
 public record RegisterUserRequest(
@@ -10,4 +8,4 @@ public record RegisterUserRequest(
     string Password,
     bool MarketingConsent,
     int TermsVersion
-) : IRequest<Guid>;
+);

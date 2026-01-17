@@ -1,26 +1,24 @@
-using MediatR;
 using UserManagement.Application.DTOs.Requests;
 using UserManagement.Application.DTOs.Responses;
+using UserManagement.Application.Interfaces;
+using UserManagement.Domain.Entities;
 using UserManagement.Domain.Interfaces;
 using UserManagement.Domain.Exceptions;
 
-namespace UserManagement.Application.UseCases.Handlers;
+namespace UserManagement.Application.Services;
 
-public class AdminHandlers : 
-    IRequestHandler<ManageUserStatusRequest, Unit>,
-    IRequestHandler<AssignRoleRequest, Unit>,
-    IRequestHandler<SearchUsersRequest, PagedResponse<UserProfileResponse>>
+public class AdminService : IAdminService
 {
     private readonly IUserRepository _userRepository;
     private readonly IAuditRepository _auditRepository;
 
-    public AdminHandlers(IUserRepository userRepository, IAuditRepository auditRepository)
+    public AdminService(IUserRepository userRepository, IAuditRepository auditRepository)
     {
         _userRepository = userRepository;
         _auditRepository = auditRepository;
     }
 
-    public async Task<Unit> Handle(ManageUserStatusRequest request, CancellationToken cancellationToken)
+    public async Task ManageStatusAsync(ManageUserStatusRequest request)
     {
         var user = await _userRepository.GetByIdAsync(request.UserId) 
             ?? throw new UserDomainException("User not found.");
@@ -31,22 +29,20 @@ public class AdminHandlers :
             user.Activate();
 
         await _userRepository.UpdateAsync(user);
-        await _auditRepository.AddAsync(new Domain.Entities.AuditLog(user.Id, request.Action, request.Reason, "N/A", "N/A", request.ActorId));
-        return Unit.Value;
+        await _auditRepository.AddAsync(new AuditLog(user.Id, request.Action, request.Reason, "N/A", "N/A", request.ActorId));
     }
 
-    public async Task<Unit> Handle(AssignRoleRequest request, CancellationToken cancellationToken)
+    public async Task AssignRoleAsync(AssignRoleRequest request)
     {
         var user = await _userRepository.GetByIdAsync(request.UserId) 
             ?? throw new UserDomainException("User not found.");
 
         user.AddRole(request.Role);
         await _userRepository.UpdateAsync(user);
-        await _auditRepository.AddAsync(new Domain.Entities.AuditLog(user.Id, "AssignRole", $"Assigned role: {request.Role}", "N/A", "N/A", request.ActorId));
-        return Unit.Value;
+        await _auditRepository.AddAsync(new AuditLog(user.Id, "AssignRole", $"Assigned role: {request.Role}", "N/A", "N/A", request.ActorId));
     }
 
-    public async Task<PagedResponse<UserProfileResponse>> Handle(SearchUsersRequest request, CancellationToken cancellationToken)
+    public async Task<PagedResponse<UserProfileResponse>> SearchUsersAsync(SearchUsersRequest request)
     {
         var items = await _userRepository.SearchAsync(request.Query, request.Role, request.Status, request.Page, request.PageSize);
         var total = await _userRepository.CountAsync(request.Query, request.Role, request.Status);

@@ -7,7 +7,7 @@ A robust User Management system built with **ASP.NET Core 8.0**, **C#**, and **M
 Theoretical layers used in this project:
 
 - **Domain**: Core entities, value objects, and repository interfaces. No external dependencies.
-- **Application**: Business logic handlers (MediatR), DTOs, and request validators (FluentValidation).
+- **Application**: Business logic services (`IUserService`, `IAdminService`), DTOs, and request validators (FluentValidation).
 - **Infrastructure**: MongoDB persistence implementation, database context, and security services (BCrypt).
 - **API**: ASP.NET Core Controllers, global exception handling, and dependency injection configuration.
 
@@ -24,7 +24,6 @@ Theoretical layers used in this project:
 
 - **Backend**: .NET 8.0
 - **Database**: MongoDB (via MongoDB.Driver)
-- **Messaging**: MediatR
 - **Validation**: FluentValidation
 - **Security**: BCrypt.Net-Next
 - **Documentation**: Swagger/OpenAPI

@@ -1,6 +1,7 @@
 using FluentValidation;
 using FluentValidation.AspNetCore;
 using UserManagement.Application.Interfaces;
+using UserManagement.Application.Services;
 using UserManagement.Application.Validators;
 using UserManagement.Domain.Interfaces;
 using UserManagement.Infrastructure.Persistence;
@@ -17,7 +18,8 @@ builder.Services.AddSwaggerGen();
 
 // Clean Architecture Setup
 // 1. Domain/Application
-builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(UserManagement.Application.Interfaces.IPasswordHasher).Assembly));
+builder.Services.AddScoped<IUserService, UserService>();
+builder.Services.AddScoped<IAdminService, AdminService>();
 builder.Services.AddValidatorsFromAssemblyContaining<RegisterUserValidator>();
 builder.Services.AddFluentValidationAutoValidation();
 
