@@ -1,6 +1,7 @@
 using MongoDB.Driver;
 using UserManagement.Domain.Entities;
 using UserManagement.Domain.ValueObjects;
+using UserManagement.Domain.Common;
 using MongoDB.Bson.Serialization;
 
 namespace UserManagement.Infrastructure.Persistence;
@@ -22,17 +23,25 @@ public class MongoDbContext
 
     private static void ConfigureMappings()
     {
-        if (BsonClassMap.IsClassMapRegistered(typeof(User))) return;
+        if (BsonClassMap.IsClassMapRegistered(typeof(BaseEntity))) return;
+
+        BsonClassMap.RegisterClassMap<UserManagement.Domain.Common.BaseEntity>(cm =>
+        {
+            cm.AutoMap();
+            cm.MapIdMember(c => c.Id);
+            cm.SetIsRootClass(true);
+        });
 
         BsonClassMap.RegisterClassMap<User>(cm =>
         {
             cm.AutoMap();
-            cm.MapIdMember(c => c.Id);
-            cm.MapField("Username").SetElementName("Username");
-            cm.MapField("Email").SetElementName("Email");
-            cm.MapField("Phone").SetElementName("Phone");
+            // Fields are automatically mapped by AutoMap, 
+            // but we can be explicit if names differ in DB
         });
 
-        // Register custom serializers for Value Objects if needed
+        BsonClassMap.RegisterClassMap<AuditLog>(cm =>
+        {
+            cm.AutoMap();
+        });
     }
 }
