@@ -13,12 +13,14 @@ public class UserService : IUserService
     private readonly IUserRepository _userRepository;
     private readonly IAuditRepository _auditRepository;
     private readonly IPasswordHasher _passwordHasher;
+    private readonly IEmailService _emailService;
 
-    public UserService(IUserRepository userRepository, IAuditRepository auditRepository, IPasswordHasher passwordHasher)
+    public UserService(IUserRepository userRepository, IAuditRepository auditRepository, IPasswordHasher passwordHasher, IEmailService emailService)
     {
         _userRepository = userRepository;
         _auditRepository = auditRepository;
         _passwordHasher = passwordHasher;
+        _emailService = emailService;
     }
 
     public async Task<Guid> RegisterAsync(RegisterUserRequest request)
@@ -49,7 +51,18 @@ public class UserService : IUserService
 
         await _userRepository.AddAsync(user);
 
-        var audit = new AuditLog(user.Id, "Register", "User registered", "N/A", "N/A", user.Id.ToString());
+        // Send Welcome Email
+        try 
+        {
+            await _emailService.SendEmailAsync(user.Email.Value, "Welcome to the System", $"<h1>Welcome {user.FullName}!</h1><p>Your account has been created successfully.</p>");
+        }
+        catch (Exception ex)
+        {
+            // Log email failure but don't fail registration (conceptual)
+            Console.WriteLine($"Email sending failed: {ex.Message}");
+        }
+
+        var audit = new AuditLog(user.Id, "Register", "User registered and welcome email sent", "N/A", "N/A", user.Id.ToString());
         await _auditRepository.AddAsync(audit);
 
         return user.Id;

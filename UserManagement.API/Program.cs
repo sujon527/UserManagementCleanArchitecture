@@ -20,6 +20,7 @@ builder.Services.AddSwaggerGen();
 // 1. Domain/Application
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IAdminService, AdminService>();
+builder.Services.AddScoped<IEmailService, EmailService>();
 builder.Services.AddValidatorsFromAssemblyContaining<RegisterUserValidator>();
 builder.Services.AddFluentValidationAutoValidation();
 
